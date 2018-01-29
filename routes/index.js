@@ -18,8 +18,7 @@ var items = [
     {code: 'A7', name: 'Soda7', description: 'desc7'}, 
     {code: 'A8', name: 'Soda8', description: 'desc8'}, 
     {code: 'A9', name: 'Soda9', description: 'desc9'}, 
-    {code: 'A10', name: 'Soda10', description: 'desc10'}, 
-    {code: 'A11', name: 'Soda11', description: 'desc11'}
+    {code: 'A10', name: 'Soda10', description: 'desc10'}
 ];
 
 router.get('/', function(req, res, next) {
