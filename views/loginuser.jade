@@ -1,0 +1,26 @@
+extends layout
+
+block content
+ div 
+ h3 'Login Users' 
+ table(border='1')
+    thead
+        tr
+            th #
+            th id
+            th name
+            th email
+            th passowrd
+    tbody
+        each item, i in items
+            tr
+                td= i+1
+                td= item.id
+                td= item.name
+                td= item.email
+                td= item.password
+                
+ <br>
+ <a id="Signup" href="../users/registration">Registration</a> 
+ <br>
+ <a id="Login" href="../users/login">Login</a> 

@@ -22,7 +22,6 @@ var items = [
 ];
 
 router.get('/', function(req, res, next) {
-  res.render('index', { items : items});
+res.render('index', { items : items});
 });
-
 module.exports = router;

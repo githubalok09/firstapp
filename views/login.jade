@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  .main.container
+    .row
+      .col-md-6.col-md-offset-3
+        h3.display-4.m-b-2 Login...
+
+        //Login form
+        form(method='POST' action='/api/users/valdiatelogin')
+         div.form-group
+            label(for='id') Id:
+            input#name.form-control(type='text', placeholder='id' name='id')         
+          div.form-group
+            label(for='pw') Password:
+            input#pw.form-control(type='password' name='password')         
+    
+           input#pw.form-control(type='submit' name='login' value='Login') 
