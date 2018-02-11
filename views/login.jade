@@ -10,9 +10,9 @@ block content
         form(method='POST' action='/api/users/valdiatelogin')
          div.form-group
             label(for='id') Id:
-            input#name.form-control(type='text', placeholder='id' name='id')         
+            input#name.form-control(type='text', name='id' placeholder='Enter your login Id', required)         
           div.form-group
             label(for='pw') Password:
-            input#pw.form-control(type='password' name='password')         
+            input#pw.form-control(type='password' name='password' placeholder='Enter your password', required)         
     
-           input#btnlogin.btn.btn-large.btn-primary(type='submit' name='btnlogin' value='Login')
+           input#btnlogin.btn.btn-large.btn-primary(type='submit' name='btnlogin' value='Login' )
