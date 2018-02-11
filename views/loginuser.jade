@@ -2,9 +2,10 @@ extends layout
 
 block content
  div 
- h3 'Login Users' 
- table(border='1')
-    thead
+  h3 Login Users
+ div
+  table(border='1', max-width='50%').table.table-striped
+    thead.thead-dark
         tr
             th #
             th id
@@ -19,8 +20,6 @@ block content
                 td= item.name
                 td= item.email
                 td= item.password
-                
- <br>
- <a id="Signup" href="../users/registration">Registration</a> 
- <br>
- <a id="Login" href="../users/login">Login</a> 
+ b               
+  <a id="Signup" href="../users/registration">Registration</a> /
+  <a id="Login" href="../users/login">Login</a> 

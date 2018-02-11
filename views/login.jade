@@ -1,7 +1,7 @@
 extends layout
-
+    
 block content
-  .main.container
+  .container
     .row
       .col-md-6.col-md-offset-3
         h3.display-4.m-b-2 Login...
@@ -15,4 +15,4 @@ block content
             label(for='pw') Password:
             input#pw.form-control(type='password' name='password')         
     
-           input#pw.form-control(type='submit' name='login' value='Login') 
+           input#btnlogin.btn.btn-large.btn-primary(type='submit' name='btnlogin' value='Login')

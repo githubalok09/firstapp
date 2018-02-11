@@ -4,12 +4,14 @@ var logindata = require('./logindata.json');
 var fs = require('fs');
 var uscore = require("underscore");
 
+var commonmethods = require('../lib/commonHelper.js');
+
 app.get('/users/list', function (req, res, next) {
-  //res.render('loginuser', { items : logindata.loginusers});
-  fs.readFile('./data/login.data', function (err, content) {
-    if (err) throw err;
-    var data = JSON.parse(content.toString());  
-    res.render('loginuser', { items: data.users});
+  commonmethods.readFile(function(err,data){
+    if (err)
+      res.json({status: 'ERROR',error:err});
+     else
+     res.render('loginuser', { items: data});
   });
 });
 app.get('/users/registration', function (req, res, next) {
@@ -18,42 +20,40 @@ app.get('/users/registration', function (req, res, next) {
 app.get('/users/login', function (req, res, next) {
   res.render('login');
 });
-app.post('/users/valdiatelogin', function (req, res, next) {
-  fs.readFile('./data/login.data', function (err, content) {
-    if (err) throw err;
-    var data = JSON.parse(content.toString());  
-    var id = req.body.id;
-    var pwd = req.body.password;
-    var filterdata = uscore.where(data.users, {id: id, password:pwd});
-    res.render('loginuser', { items: filterdata});
-  });
-});
 app.post('/users/add', function (req, res, next) {
- // console.log("called post");
-  fs.readFile('./data/login.data', function (err, content) {
-    if (err) throw err;
-    var data = JSON.parse(content.toString());
-    //console.log(data);
-    var users = data.users;
-    var user = {
-      id: req.body.id,
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password
-    };
-    var id = req.body.id;
-    var filterdata = uscore.where(data.users, {id: id});
-   if(filterdata.length == 0){
-    data.users.push(user);
-
-    fs.writeFile('./data/login.data', JSON.stringify(data), function (err) {
-      if (err) throw err
-      else res.redirect('/api/users/list');
-    })
-  }  
-  else{ res.send('Login id exist !!') } 
-  })
+  var user = {
+    id: req.body.id,
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password
+  }; 
+  commonmethods.writeFile(user,function(err,data){
+    if (err)
+      res.json({status: 'ERROR',error:err});
+     else
+     {
+       if(data=='success')
+         res.redirect('/api/users/list');
+       else
+        res.json({status: 'info',info:'Record exist, please try new user id!!'});
+     }  
+  });
+}); 
+app.post('/users/valdiatelogin', function (req, res, next) {
+  var user = {
+    id: req.body.id,   
+    password: req.body.password
+  };
+  commonmethods.ValidateLogin(user,function(err,data){
+    if (err)
+      res.json({status: 'ERROR',error:err});
+     else{
+       if(data == 'notfound')
+       res.json({status: 'INFO',info:'Login Id not found in record !!'});
+       else      
+       res.render('loginuser', { items: data});
+     }
+   });   
 });
-
 
 module.exports = app;
