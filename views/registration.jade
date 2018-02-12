@@ -10,7 +10,8 @@ block content
         form(method='POST' action='/api/users/add')
          div.form-group
             label(for='id') Id:
-            input#name.form-control(type='text', name='id', placeholder='Enter your login Id', required)
+            input#name.form-control(type='text', name='id', placeholder='Enter your login Id', required, onblur='fnGetLoginAvailbility()')
+            span#spname.alert      
           div.form-group
             label(for='name') Name:
             input#name.form-control(type='text', placeholder='first and last' name='name', required)

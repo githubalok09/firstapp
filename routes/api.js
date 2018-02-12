@@ -14,6 +14,22 @@ app.get('/users/list', function (req, res, next) {
      res.render('loginuser', { items: data});
   });
 });
+app.get('/users/loginidavailbility/:id', function (req, res, next) {
+  var user = {
+    id: req.params.id,
+   };   
+   commonmethods.CheckAvaialbility(user,function(err,data){
+    if (err)
+      res.json({status: 'ERROR',error:err});
+     else{
+       //console.log(data);
+       if(data == 'notfound')       
+        res.json({status:'notfound', info:'Login Id is available'});      
+       else     
+        res.json({status:'found', info:'Login id in use, please try with new login id !!'});       
+     }
+   });   
+});  
 app.get('/users/registration', function (req, res, next) {
   res.render('registration');
 });
