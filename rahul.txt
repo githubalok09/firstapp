@@ -1,0 +1,212 @@
+API.JS
+
+var express = require('express');
+var router = express.Router();
+var fs = require('fs');
+var session = require('express-session');
+var commonmethods = require('../lib/commonHelper.js');
+var sess;
+
+/* GET Home page. */
+router.get('/', function(req, res, next) {
+    res.render('index');
+});
+
+router.get('/setsession', function(req, res, next){
+  console.log('set-session')
+  sess=req.session;
+  sess.email = "ak@g.com"; 
+  sess.username = "alok111"; 
+  console.log(sess);
+  return;
+});
+
+router.get('/checksession',function(req,res,next){
+  console.log('get-session')
+  sess = req.session;
+  console.log(sess.email);
+  console.log(sess.username);
+  console.log(sess.sessionID);
+  console.log(sess);
+  return;
+});
+  
+router.get('/index', function(req, res, next) {
+    res.render('index');
+  });
+
+/* GET registration page. */
+router.get('/registration', function (req, res, next) {
+    res.render('registration');
+  });
+/* GET Login page. */
+router.get('/login', function (req, res, next) {
+  res.render('login');
+});
+/* GET Hindu pujalist page. */
+router.get('/products', function (req, res, next) {  
+  commonmethods.getProductList(function(err,data){    
+    if (err)
+      res.json({status: 'ERROR',error:err});
+     else
+     res.render('products', {productitems: data});
+  });  
+});
+
+/* Add registration form info. */
+router.post('/users/add', function (req, res, next) {
+    var user = {
+      UserId: req.body.userid,
+      Password: req.body.password,
+      RegType: req.body.regtype,
+      Role: req.body.regtype == "1" ? "8" : "9",
+      Fname: req.body.firstname,
+      Lname: req.body.lastname,
+      Email: req.body.email,
+      Mobile: req.body.mobile, 
+      Status:"0"
+    };
+       console.log(user);
+    commonmethods.writeFile(user,function(err,data){
+      if (err)
+      res.render('registration',{statuserror: 'ERROR',msg:'A problem has been occurred while submitting your data. please try again!!'});
+       else
+       {
+         if(data=='success')
+         res.render('registration',{statussuccess: 'success',msg:'Successfully saved data and send email on registered email id for Verifiaction. Kindly verify email id for activate your account'});
+         else
+         res.render('registration',{statuserror: 'ERROR',msg:'record exist, please try with new userid and email'});
+       }  
+    });
+  }); 
+router.post('/users/validatelogin', function (req, res, next) {
+    var user = {
+      UserId: req.body.userid,   
+      Password: req.body.password
+    };
+    console.log(user);
+    commonmethods.ValidateLogin(user,function(err,data){
+      if (err)
+       res.render('registration',{statuserror: 'ERROR',msg:'A problem has been occurred in login. please try again!!'});
+       /*res.json({status: 'ERROR',error:err});*/
+
+       else{
+         if(data == 'notfound')
+         res.render('login',{statuserror: 'ERROR',msg:'LoginId/Password mismatch, please try again!!'});
+         else   
+         res.render('index');   
+         /*res.render('loginuser', { items: data});*/
+       }
+     });   
+  });
+  
+router.post('/users/valdiateEmail', function (req, res, next) {
+    var user = {
+      id: req.body.id,   
+      password: req.body.password
+    };
+    commonmethods.ValidateLogin(user,function(err,data){
+      if (err)
+        res.json({status: 'ERROR',error:err});
+       else{
+         if(data == 'notfound')
+         res.json({status: 'INFO',info:'Login Id not found in record !!'});
+         else      
+         res.render('loginuser', { items: data});
+       }
+     });   
+  });
+
+module.exports = router;
+==========================================================
+CommonMethods.js
+var fs = require('fs');
+var uscore = require("underscore");
+
+var commonmethods = {
+readFile : function(cb) {
+	fs.readFile('./data/login.data', function (err, content) {
+		if (err) 
+		cb(err,undefined);
+		
+		var data = JSON.parse(content.toString());
+		cb(undefined,data.users);
+	  });	 
+},
+getProductList : function(cb) {
+	fs.readFile('./data/products.data', function (err, content) {		
+		if (err) 
+		cb(err,undefined);
+		
+		var data = JSON.parse(content.toString());
+		cb(undefined,data.ProductList);
+	  });	 
+},
+writeFile : function(user, cb) {
+	fs.readFile('./data/users.data', function (err, content) {
+		if (err)  	
+		cb(err,undefined);
+    
+		var data = JSON.parse(content.toString());	
+		console.log("1 - " + data);	
+		var users = data.users;	
+	 var filterdata = uscore.where(data.users, {Userid: user.UserId, Email: user.Email});
+	 console.log("2");	
+	   if(filterdata.length == 0){
+			data.users.push(user);
+			console.log("3");	
+		fs.writeFile('./data/users.data', JSON.stringify(data), function (err) {
+		  if (err)
+		   cb(err,undefined);
+
+		   cb(undefined,"success");
+		})
+	  }  
+	   else{  cb(undefined,"exist"); } 
+	  })
+},
+ValidateLogin : function(user,cb) {
+	fs.readFile('./data/users.data', function (err, content) {
+	   if (err) 
+		cb(err,undefined)		 
+	
+		var data = JSON.parse(content.toString());  
+			var filterdatabyUserid = uscore.where(data.users, {UserId: user.UserId, Password:user.Password});
+			var filterdatabyEmail = uscore.where(data.users, {Email: user.Email, Password:user.Password});
+		
+			if(filterdatabyUserid.length > 0)
+			 cb(undefined,filterdatabyUserid);
+			 else if(filterdatabyEmail.length > 0)
+			 cb(undefined,filterdatabyEmail);
+			 else
+			 cb(undefined,'notfound');		
+		  });
+	
+},
+CheckAvaialbility : function(user,cb) {
+	fs.readFile('./data/users.data', function (err, content) {
+	   if (err) 
+		cb(err,undefined)		 
+	
+		var data = JSON.parse(content.toString());  
+	    var filterdata = uscore.where(data.users, {id: user.id});
+			//res.render('loginuser', { items: filterdata});
+			if(filterdata.length > 0)		
+			 cb(undefined,'found');			
+			 else
+			 cb(undefined,'notfound');
+			 
+		  });	
+}
+} //End
+
+module.exports = commonmethods;
+////////////////////////////////////////////////
+{"ProductList":[{"pid":"1","ProdcutName":"Sagai","ProductTitle":"Sagai", "ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},{"pid":"2","ProdcutName":"Ganesh Puja","ProductTitle":"laxmi Poojan on diwali","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},
+{"pid":"3","ProdcutName":"Vivah","ProductTitle":"Vivah","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},
+{"pid":"4","ProdcutName":"Bhagwad Geeta","ProductTitle":"Bhagwad Geeta","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},
+{"pid":"5","ProdcutName":"Bhagwad Geeta1","ProductTitle":"Bhagwad Geeta","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},
+{"pid":"6","ProdcutName":"Bhagwad Geeta2","ProductTitle":"Bhagwad Geeta","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},
+{"pid":"7","ProdcutName":"Bhagwad Geeta3","ProductTitle":"Bhagwad Geeta","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""},
+{"pid":"8","ProdcutName":"Bhagwad Geeta4","ProductTitle":"Bhagwad Geeta","ProductDesc":"", "ProductPrice":"220", "Currency":"INR", "Image":""}
+]}
